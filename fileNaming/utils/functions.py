@@ -46,10 +46,15 @@ def save_df_to_excel_underline(df, fullpath, key_columns_no=1, font_size=9):
     # 스타일 지정
     # 폰트 (데이터 부분)
     font_data = Font(size=font_size)
+    # 배경색 (헤더)
+    fill_col = PatternFill(fill_type='solid', start_color='FFDDD9C4', end_color='FFDDD9C4') # 칼럼명
+    alignment = Alignment(horizontal='center', vertical='center')
     
     # 헤더행 스타일 적용    
     for cell in ws[1] :
-        cell.font = font_data
+        cell.font = Font(size=font_size, bold=True)
+        cell.fill = fill_col
+        cell.alignment = alignment
         
     # 데이터행 스타일 적용
     for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
@@ -79,6 +84,77 @@ def save_df_to_excel_underline(df, fullpath, key_columns_no=1, font_size=9):
                 for col in range(1, ws.max_column + 1):
                     ws.cell(row=row-1, column=col).border = underline_border
             prev_value = current_value        
+    
+
+    # 엑셀 파일 저장
+    wb.save(fullpath)
+    
+def save_df_to_excel_two_underline(df, fullpath, key_columns_no=1, sub_key_columns_no=0, font_size=9):
+    """키값의 열번호를 작성하면 키값이 달라질때마다 밑줄 그어줌(a열이 1번), 필요없으면 0입력"""
+    
+    # na값 처리 : onpenpyxl은 pandas.NA값을 처리 못함
+    df = df.replace({pd.NA:None})
+    
+    
+    # 엑셀 열기
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Sheet1"
+    
+    # 시트에 데이터 쓰기
+    for r in dataframe_to_rows(df, index=False, header=True) : 
+        ws.append(r)
+        
+    # 스타일 지정
+    # 폰트 (데이터 부분)
+    font_data = Font(size=font_size)
+    # 배경색 (헤더)
+    fill_col = PatternFill(fill_type='solid', start_color='FFDDD9C4', end_color='FFDDD9C4') # 칼럼명
+    alignment = Alignment(horizontal='center', vertical='center')
+    
+    # 헤더행 스타일 적용    
+    for cell in ws[1] :
+        cell.font = Font(size=font_size, bold=True)
+        cell.fill = fill_col
+        cell.alignment = alignment
+
+    # 데이터행 스타일 적용
+    for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
+        for cell in row:
+            # 정수 데이터인 경우
+            if isinstance(cell.value, int):
+                cell.font = font_data
+                cell.number_format = '#,##0'
+                cell.alignment = Alignment(horizontal='right', vertical='center')
+            # 날짜 데이터인 경우
+            elif isinstance(cell.value, pd.Timestamp):
+                cell.font = font_data
+                cell.number_format = 'yyyy-mm-dd'
+            # 나머지 문자열 데이터인 경우
+            else:
+                cell.font = font_data
+     
+    
+    # 밑줄 스타일 지정
+    underline_border = Border(bottom=Side(style='thin'))
+    dotted_border = Border(bottom=Side(style='dotted'))
+    
+    prev_value = None
+    prev_sub_value = None
+    
+    for row in range(2, ws.max_row + 1):
+        current_value = ws.cell(row=row, column=key_columns_no).value if key_columns_no > 0 else None
+        sub_value = ws.cell(row=row, column=sub_key_columns_no).value if sub_key_columns_no > 0 else None
+        
+        if prev_value is not None and current_value != prev_value:
+            for col in range(1, ws.max_column + 1):
+                ws.cell(row=row - 1, column=col).border = underline_border
+        elif prev_sub_value is not None and sub_value != prev_sub_value:
+            for col in range(1, ws.max_column + 1):
+                ws.cell(row=row - 1, column=col).border = dotted_border
+        
+        prev_value = current_value
+        prev_sub_value = sub_value 
     
 
     # 엑셀 파일 저장
@@ -117,3 +193,10 @@ def 키워드로파일명찾기(폴더:str, 포함키워드:str, 제외키워드
         else : 
             print(f"포함키워드:{포함키워드}, 제외키워드{제외키워드} 조건을 만족하는 파일이 둘 이상입니다.")
             print(fn)
+            
+            
+def swap_columns(df, col1, col2):
+    cols = df.columns.tolist()
+    idx1, idx2 = cols.index(col1), cols.index(col2)
+    cols[idx1], cols[idx2] = cols[idx2], cols[idx1]
+    return df[cols]
