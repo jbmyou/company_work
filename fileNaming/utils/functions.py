@@ -12,7 +12,15 @@ import os
 from os.path import join
 import re
 import pandas as pd
+from IPython.display import display
     
+
+path_dataset = r"D:\3.자산\전산 dataset"
+
+
+dtype = {'채무자키': str, '타채무자키': str, '담당자키': str, '관리자비고': str, '계좌키': str, '보증인키': str, '분납키': str, '사건키': str, '신고계좌': str, '입금계좌': str,
+ '신용회복키': str, '계좌번호': str, '심의차수': str, '변제금수취계좌': str, '법조치키': str, '관련법조치키': str, '법취하키': str, '타법조치키': str, '관할법원코드': str, '입금키': str, '입금고정키': str, '감면키': str}
+
     
 debt_dtype = {'채무자키':str, '타채무자키':str, '담당자키':str, '관리자비고':str}
 account_dtype = {'채무자키':str, '계좌키':str, '타채무자키':str}
@@ -30,7 +38,7 @@ installment_dtype = {'채무자키':str, '계좌키':str, '분납키':str}
 
 
 def save_df_to_excel_underline(df, fullpath, key_columns_no=1, font_size=9):
-    """키값의 열번호를 작성하면 키값이 달라질때마다 밑줄 그어줌(a열이 1번), 필요없으면 0입력"""
+    """키값의 열번호나 열이름을 작성하면 키값이 달라질때마다 밑줄 그어줌(a열이 1번), 필요없으면 0입력"""
     
     # na값 처리 : onpenpyxl은 pandas.NA값을 처리 못함
     df = df.replace({pd.NA:None})
@@ -76,6 +84,10 @@ def save_df_to_excel_underline(df, fullpath, key_columns_no=1, font_size=9):
      
     
     # 그룹 열의 값이 달라질 때마다 밑줄 추가
+        # 칼럼명이 주어진 경우 칼럼순번으로 바꾸기
+    if isinstance(key_columns_no, str) :
+        key_columns_no = df.columns.get_loc(key_columns_no) + 1
+    
     if key_columns_no > 0 : 
         underline_border = Border(bottom=Side(style='thin'))
         prev_value = None
@@ -92,7 +104,7 @@ def save_df_to_excel_underline(df, fullpath, key_columns_no=1, font_size=9):
     wb.save(fullpath)
     
 def save_df_to_excel_two_underline(df, fullpath, key_columns_no=1, sub_key_columns_no=0, font_size=9):
-    """키값의 열번호를 작성하면 키값이 달라질때마다 밑줄 그어줌(a열이 1번), 필요없으면 0입력"""
+    """키값의 열번호나 열이름을 작성하면 키값이 달라질때마다 밑줄 그어줌(a열이 1번), 필요없으면 0입력"""
     
     # na값 처리 : onpenpyxl은 pandas.NA값을 처리 못함
     df = df.replace({pd.NA:None})
@@ -144,6 +156,15 @@ def save_df_to_excel_two_underline(df, fullpath, key_columns_no=1, sub_key_colum
     prev_value = None
     prev_sub_value = None
     
+    
+    # 그룹 열의 값이 달라질 때마다 밑줄 추가
+        # 칼럼명이 주어진 경우 칼럼순번으로 바꾸기
+    if isinstance(key_columns_no, str) :
+        key_columns_no = df.columns.get_loc(key_columns_no) + 1
+        
+    if isinstance(sub_key_columns_no, str) :
+        sub_key_columns_no = df.columns.get_loc(sub_key_columns_no) + 1
+        
     for row in range(2, ws.max_row + 1):
         current_value = ws.cell(row=row, column=key_columns_no).value if key_columns_no > 0 else None
         sub_value = ws.cell(row=row, column=sub_key_columns_no).value if sub_key_columns_no > 0 else None
@@ -163,8 +184,29 @@ def save_df_to_excel_two_underline(df, fullpath, key_columns_no=1, sub_key_colum
     wb.save(fullpath)
 
 
+def save_excel_with_explain(df, fullpath, key_columns_no=1, sub_key_columns_no=0, font_size=9) :
+    save_fn = os.path.basename(fullpath).split('.')[0]
+    if len(df)>0 :
+        print(f'★ {save_fn} {len(df)}건 엑셀출력')
+        save_df_to_excel_two_underline(df, fullpath, key_columns_no=key_columns_no, sub_key_columns_no=sub_key_columns_no, font_size=font_size)
+        print('')
+    else : 
+        print(f'☆ {save_fn} 출력건 없음')
+        print('')
+
+
+def display_with_explain(df, explain="") : 
+    if not df.empty :
+        print(f'★ {explain} {len(df)}건')
+        display(df)
+        print('')
+    else : 
+        print(f'☆ {explain} 없음')
+        print('')
+
+
 # 차감할연체이자 계산용
-def 날짜차이(입금일:str, 기준일:str) :
+def 문자열날짜차이(입금일:str, 기준일:str) :
     date_format = "%Y-%m-%d"
     """ 문자열 타입의 두 날짜 사이의 날짜차이 리턴 """
     date1 = datetime.strptime(입금일, date_format)
@@ -173,6 +215,7 @@ def 날짜차이(입금일:str, 기준일:str) :
 
 
 def 키워드로파일명찾기(폴더:str, 포함키워드:str, 제외키워드="", 전체경로=True, 여러파일허용=False) :
+    """포함키워드, 제외키워드로 파일 경로 찾기, 여러파일 허용시 목록을 반환하므로 선택할 수 있음"""
     file_list = [file for file in os.listdir(폴더) if not file.startswith('~$')]
     if 제외키워드 == "" : 
         fn = [file for file in file_list if re.search(포함키워드, file)]
@@ -195,7 +238,8 @@ def 키워드로파일명찾기(폴더:str, 포함키워드:str, 제외키워드
         else : 
             print(f"포함키워드:{포함키워드}, 제외키워드{제외키워드} 조건을 만족하는 파일이 둘 이상입니다.")
             print(fn)
-            
+
+
             
 def swap_columns(df, col1, col2):
     cols = df.columns.tolist()
