@@ -1,0 +1,27 @@
+name: py_312
+channels:
+  - defaults
+dependencies:
+  - python=3.12
+  - pip
+  - numpy
+  - pandas
+  - openpyxl
+  - jupyter
+  - notebook
+  - ipykernel
+  - ipywidgets
+  - pyqt
+  - matplotlib
+  - pyyaml
+  - pywin32
+  - pip:
+      - selenium
+      - pytesseract
+      - pyautogui
+      - pdfminer.six
+      - pywinauto
+      - webdriver-manager
+      - pydub
+      - pyinstaller
+      - xlwings
