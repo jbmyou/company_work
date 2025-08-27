@@ -246,3 +246,16 @@ def swap_columns(df, col1, col2):
     idx1, idx2 = cols.index(col1), cols.index(col2)
     cols[idx1], cols[idx2] = cols[idx2], cols[idx1]
     return df[cols]
+
+
+def to_parquet(df, fullpath:str, engine="pyarrow") :
+    """확장자 써도 되고 안 써도 됨. engine기본값은 'pyarrow'"""
+    
+    if not re.search(r"\.parquet$", fullpath) :
+        fullpath = fullpath + ".parquet"
+    
+    # 1) object 컬럼 → str
+    for col in df.select_dtypes(include='object').columns:
+        df[col] = df[col].astype(str)
+        
+    df.to_parquet(fullpath, engine=engine)
