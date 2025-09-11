@@ -35,6 +35,7 @@ event_dtype = {'채무자키':str, '법조치키':str, '계좌키':str, '관련�
 deposit_dtype = {'채무자키':str, '입금키':str, '계좌키':str, '계좌번호':str, '입금고정키':str, '타채무자키':str}
 reduction_dtype = {'채무자키':str, '계좌키':str, '감면키':str}
 installment_dtype = {'채무자키':str, '계좌키':str, '분납키':str}
+memo_dtype = {'채무자키':str, '메모키':str}
 
 
 def save_df_to_excel_underline(df, fullpath, key_columns_no=1, font_size=9):
