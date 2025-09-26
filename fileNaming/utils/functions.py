@@ -13,6 +13,7 @@ from os.path import join
 import re
 import pandas as pd
 from IPython.display import display
+from itertools import chain
     
 
 path_dataset = r"D:\3.자산\전산 dataset"
@@ -186,7 +187,7 @@ def save_df_to_excel_two_underline(df, fullpath, key_columns_no=1, sub_key_colum
 
 
 def save_excel_with_explain(df, fullpath, key_columns_no=1, sub_key_columns_no=0, font_size=9) :
-    save_fn = os.path.basename(fullpath).split('.')[0]
+    save_fn = os.path.splitext(os.path.basename(fullpath))[0]
     if len(df)>0 :
         print(f'★ {save_fn} {len(df)}건 엑셀출력')
         save_df_to_excel_two_underline(df, fullpath, key_columns_no=key_columns_no, sub_key_columns_no=sub_key_columns_no, font_size=font_size)
@@ -260,3 +261,7 @@ def to_parquet(df, fullpath:str, engine="pyarrow") :
         df[col] = df[col].astype(str)
         
     df.to_parquet(fullpath, engine=engine)
+    
+
+def unique_elements(*lists):
+    return list(dict.fromkeys(chain.from_iterable(lists)))
