@@ -193,7 +193,7 @@ def save_excel_with_explain(df, fullpath, key_columns_no=1, sub_key_columns_no=0
         save_df_to_excel_two_underline(df, fullpath, key_columns_no=key_columns_no, sub_key_columns_no=sub_key_columns_no, font_size=font_size)
         print('')
     else : 
-        print(f'☆ {save_fn} 출력건 없음')
+        print(f'○ {save_fn} 출력건 없음')
         print('')
 
 
@@ -203,7 +203,7 @@ def display_with_explain(df, explain="") :
         display(df)
         print('')
     else : 
-        print(f'☆ {explain} 없음')
+        print(f'○ {explain} 없음')
         print('')
 
 
