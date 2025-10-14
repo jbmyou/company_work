@@ -18,10 +18,6 @@ from itertools import chain
 
 path_dataset = r"D:\3.자산\전산 dataset"
 
-
-dtype = {'채무자키': str, '타채무자키': str, '담당자키': str, '관리자비고': str, '계좌키': str, '보증인키': str, '분납키': str, '사건키': str, '신고계좌': str, '입금계좌': str,
- '신용회복키': str, '계좌번호': str, '심의차수': str, '변제금수취계좌': str, '법조치키': str, '관련법조치키': str, '법취하키': str, '타법조치키': str, '관할법원코드': str, '입금키': str, '입금고정키': str, '감면키': str}
-
     
 debt_dtype = {'채무자키':str, '타채무자키':str, '담당자키':str, '관리자비고':str}
 account_dtype = {'채무자키':str, '계좌키':str, '타채무자키':str}
@@ -37,6 +33,9 @@ deposit_dtype = {'채무자키':str, '입금키':str, '계좌키':str, '계좌�
 reduction_dtype = {'채무자키':str, '계좌키':str, '감면키':str}
 installment_dtype = {'채무자키':str, '계좌키':str, '분납키':str}
 memo_dtype = {'채무자키':str, '메모키':str}
+
+통합_dtype = {**debt_dtype, **account_dtype, **grt_dtype, **rehabilitation_dtype, **credit_dtype, **nauri_credit_dtype, 
+            **event_dtype, **deposit_dtype, **reduction_dtype, **installment_dtype, **memo_dtype}
 
 
 def save_df_to_excel_underline(df, fullpath, key_columns_no=1, font_size=9):
