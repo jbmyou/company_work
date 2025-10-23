@@ -14,6 +14,7 @@ import re
 import pandas as pd
 from IPython.display import display
 from itertools import chain
+import io, msoffcrypto
     
 
 path_dataset = r"D:\3.자산\전산 dataset"
@@ -264,3 +265,29 @@ def to_parquet(df, fullpath:str, engine="pyarrow") :
 
 def unique_elements(*lists):
     return list(dict.fromkeys(chain.from_iterable(lists)))
+
+
+def get_info_from_decrypted_excel_dict (dict_keys_want) :
+    
+    #----------------------------------------------
+    path_pw_excel = r"D:\3.자산\login_info_keys.txt" # 개인pc저장
+    path_excel_decrypted = r"\\192.168.0.75\자산관리팀\login_info.xlsx" # 나스 저장
+    #----------------------------------------------
+    
+    pw_excel = open(path_pw_excel, "r").read()
+    
+    decrypted = io.BytesIO()
+    
+    with open(path_excel_decrypted, "rb") as f :
+        office_file = msoffcrypto.OfficeFile(f)
+        office_file.load_key(password=pw_excel)
+        office_file.decrypt(decrypted)
+    
+    decrypted.seek(0)
+    df = pd.read_excel(decrypted)
+    
+    rst = []
+    for key in dict_keys_want:
+        rst.append(df.loc[df.key==key, "value"].values[0])
+    
+    return rst
