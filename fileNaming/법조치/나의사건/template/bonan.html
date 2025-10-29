@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>사건 상세 (오프라인 템플릿)</title>
+
+  <link rel="stylesheet" href="./css/content.css">
+  <link rel="stylesheet" href="./css/common.css">
+  <style>
+    body { font-family: Arial, "Malgun Gothic", sans-serif; padding:12px; background:#fff; color:#222; }
+    .panel { border:1px solid #e0e0e0; padding:12px; border-radius:4px; background:#f9f9f9; margin-bottom:14px;}
+    .tabs { display:flex; gap:8px; margin-bottom:12px; }
+    .tab { padding:8px 14px; border:1px solid #cfcfcf; border-radius:6px; background:white; cursor:pointer;}
+    .tab.active { background:#0b6cf6; color:white; border-color:#0b6cf6; }
+    table.ct_tbl { width:100%; border-collapse:collapse; margin-bottom:12px; }
+    table.ct_tbl th, table.ct_tbl td { border:1px solid #e8e8e8; padding:10px; vertical-align: middle; }
+    .label { font-weight:600; width:18%; }
+    .value { background:#fff; }
+    .grid { margin-top:8px; }
+    .con_stit { font-weight:600; margin-top:18px; margin-bottom:6px; }
+  </style>
+</head>
+<body>
+
+  <div id="mf_top_group" class="w2group">
+    <div id="mf_wfSsgoDetail" class="w2wframe">
+
+      <!-- 알림 -->
+      <div class="panel" id="noticeBox">
+        <strong>대법원 전자소송</strong>
+        <p style="margin:6px 0 0 0;">본 사이트에서 제공된 사건정보는 법적인 효력이 없으니, 참고자료로만 활용하시기 바랍니다.</p>
+      </div>
+
+      <!-- 탭 -->
+      <div class="tabs">
+        <div class="tab active" id="tab-general">일반내용</div>
+        <div class="tab" id="tab-progress">진행내용</div>
+      </div>
+
+      <!-- 본문 -->
+      <div id="printAreaCsRsltGnrl">
+        <div class="con_stit">기본내용 <span id="courtName" style="font-weight:400; margin-left:8px;"></span></div>
+
+        <table class="ct_tbl" id="mainInfoTable" aria-describedby="사건정보">
+          <tbody>
+            <tr>
+              <th class="label">사건번호</th><td class="value" id="case_no">-</td>
+              <th class="label">사건명</th><td class="value" id="case_title">-</td>
+            </tr>
+            <tr>
+              <th class="label">원고</th><td class="value" id="plaintiff">-</td>
+              <th class="label">피고</th><td class="value" id="defendant">-</td>
+            </tr>
+            <tr>
+              <th class="label">재판부</th><td class="value" id="bench" colspan="3">-</td>
+            </tr>
+            <tr>
+              <th class="label">접수일</th><td class="value" id="rcpt_date">-</td>
+              <th class="label">종국결과</th><td class="value" id="final_result">-</td>
+            </tr>
+            <tr>
+              <th class="label">원고소가</th><td class="value" id="plaintiff_amt">-</td>
+              <th class="label">피고소가</th><td class="value" id="defendant_amt">-</td>
+            </tr>
+            <tr>
+              <th class="label">수리구분</th><td class="value" id="accept_type">-</td>
+              <th class="label">병합구분</th><td class="value" id="merge_type">-</td>
+            </tr>
+            <tr>
+              <th class="label">인지액</th><td class="value" id="stmp_amt">-</td>
+              <th class="label">판결도달일</th><td class="value" id="adjdoc_date">-</td>
+            </tr>
+            <tr>
+              <th class="label">확정일</th><td class="value" id="confirm_date">-</td>
+              <th class="label">송달/보관 알림</th><td class="value">사건이 종결되고 송달료·보관금 계좌가 종결된 경우에만 조회 가능합니다.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- 최근기일내용 -->
+        <div class="con_stit">최근기일내용</div>
+        <table class="ct_tbl" id="recentDays">
+          <thead>
+            <tr><th>일자</th><th>시각</th><th>기일구분</th><th>기일장소</th><th>결과</th></tr>
+          </thead>
+          <tbody id="recentDaysBody"></tbody>
+        </table>
+
+        <!-- 최근 제출서류 -->
+        <div class="con_stit">최근 제출서류 접수내용</div>
+        <table class="ct_tbl" id="recentDocs">
+          <thead><tr><th>일자</th><th>내용</th></tr></thead>
+          <tbody id="recentDocsBody"></tbody>
+        </table>
+
+        <!-- 당사자내용 -->
+        <div class="con_stit">당사자내용</div>
+        <table class="ct_tbl" id="parties">
+          <thead><tr><th>구분</th><th>이름/정보</th><th>종국결과</th><th>판결도달일</th><th>확정일</th></tr></thead>
+          <tbody id="partiesBody"></tbody>
+        </table>
+
+        <!-- 대리인내용 -->
+        <div class="con_stit">대리인내용</div>
+        <table class="ct_tbl" id="attorneys">
+          <thead><tr><th>구분</th><th>이름</th></tr></thead>
+          <tbody id="attorneysBody"></tbody>
+        </table>
+
+      </div><!-- printAreaCsRsltGnrl -->
+    </div>
+  </div>
+
+  <script>
+    async function loadDataJSON(filename = '../data/sample_case.json') {
+      try {
+        const res = await fetch(filename);
+        if (!res.ok) throw new Error('데이터를 찾을 수 없음: ' + filename);
+        const data = await res.json();
+        fillTemplate(data);
+      } catch (e) {
+        console.warn('데이터 로드 실패', e);
+      }
+    }
+
+    function fillTemplate(d) {
+      // 기본정보
+      document.getElementById('courtName').textContent = d.courtName || '';
+      document.getElementById('case_no').textContent = d.caseNo || '';
+      document.getElementById('case_title').textContent = d.caseTitle || '';
+      document.getElementById('plaintiff').textContent = d.plaintiff || '';
+      document.getElementById('defendant').textContent = d.defendant || '';
+      document.getElementById('bench').textContent = d.bench || '';
+      document.getElementById('rcpt_date').textContent = d.rcptDate || '';
+      document.getElementById('final_result').textContent = d.finalResult || '';
+      document.getElementById('plaintiff_amt').textContent = d.plaintiffAmt || '';
+      document.getElementById('defendant_amt').textContent = d.defendantAmt || '';
+      document.getElementById('accept_type').textContent = d.acceptType || '';
+      document.getElementById('merge_type').textContent = d.mergeType || '';
+      document.getElementById('stmp_amt').textContent = d.stampAmt || '';
+      document.getElementById('adjdoc_date').textContent = d.adjdocDate || '';
+      document.getElementById('confirm_date').textContent = d.confirmDate || '';
+
+      // 최근기일
+      const rd = document.getElementById('recentDaysBody');
+      rd.innerHTML = '';
+      (d.recentDays || []).forEach(r => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${r.date||''}</td><td>${r.time||''}</td><td>${r.kind||''}</td><td>${r.place||''}</td><td>${r.result||''}</td>`;
+        rd.appendChild(tr);
+      });
+
+      // 제출서류
+      const docs = document.getElementById('recentDocsBody');
+      docs.innerHTML = '';
+      (d.recentDocs || []).forEach(doc => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${doc.date||''}</td><td>${doc.content||''}</td>`;
+        docs.appendChild(tr);
+      });
+
+      // 당사자
+      const parties = document.getElementById('partiesBody');
+      parties.innerHTML = '';
+      (d.parties || []).forEach(p => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${p.type||''}</td><td>${p.name||''}</td><td>${p.final||''}</td><td>${p.adjdoc||''}</td><td>${p.confirm||''}</td>`;
+        parties.appendChild(tr);
+      });
+
+      // 대리인
+      const atty = document.getElementById('attorneysBody');
+      atty.innerHTML = '';
+      (d.attorneys || []).forEach(a => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${a.type||''}</td><td>${a.name||''}</td>`;
+        atty.appendChild(tr);
+      });
+    }
+
+    loadDataJSON();
+  </script>
+
+</body>
+</html>

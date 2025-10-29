@@ -1,0 +1,30 @@
+{
+  "courtName": "서울중앙지방법원",
+  "caseNo": "2025가소12345",
+  "caseTitle": "대여금",
+  "plaintiff": "주식회사 슬림헬프자산관리대부",
+  "defendant": "안인섭",
+  "bench": "민사13단독",
+  "rcptDate": "2025.08.01",
+  "finalResult": "원고승",
+  "plaintiffAmt": "10,000,000",
+  "defendantAmt": "-",
+  "acceptType": "단독",
+  "mergeType": "없음",
+  "stampAmt": "55,000",
+  "adjdocDate": "2025.08.19",
+  "confirmDate": "2025.08.29",
+
+  "recentDays": [],
+  "recentDocs": [
+    {"date": "2025.09.02", "content": "원고 주식회사 슬림헬프자산관리대부 확정증명서"},
+    {"date": "2025.09.02", "content": "원고 주식회사 슬림헬프자산관리대부 송달증명서"}
+  ],
+  "parties": [
+    {"type": "원고", "name": "주식회사 슬림헬프자산관리대부 대표이사 정호석", "final": "2025.08.12 원고승", "adjdoc": "2025.08.19", "confirm": ""},
+    {"type": "피고", "name": "안인섭", "final": "2025.08.12 원고승 (공시송달)", "adjdoc": "2025.08.15", "confirm": "2025.08.29"}
+  ],
+  "attorneys": [
+    {"type": "원고 대리인", "name": "개인 최하은"}
+  ]
+}
