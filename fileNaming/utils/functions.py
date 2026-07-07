@@ -267,17 +267,18 @@ def swap_columns(df, col1, col2):
     return df[cols]
 
 
-def to_parquet(df, fullpath:str, engine="pyarrow") :
+def to_parquet(df, fullpath:str, engine="pyarrow"):
     """확장자 써도 되고 안 써도 됨. engine기본값은 'pyarrow'"""
-    
-    if not re.search(r"\.parquet$", fullpath) :
-        fullpath = fullpath + ".parquet"
-    
-    # 1) object 컬럼 → str
-    for col in df.select_dtypes(include='object').columns:
-        df[col] = df[col].astype(str)
-        
-    df.to_parquet(fullpath, engine=engine)
+
+    if not fullpath.endswith(".parquet"):
+        fullpath += ".parquet"
+
+    out = df.copy()
+    for col in out.select_dtypes(include=["object", "string"]).columns:
+        missing_strings = out[col].astype("string").str.strip().str.lower().isin(["<na>", "nan", "none", "nat"])
+        out[col] = out[col].mask(missing_strings, "").fillna("").astype(str)
+
+    out.to_parquet(fullpath, engine=engine)
     
 
 def unique_elements(*lists):
